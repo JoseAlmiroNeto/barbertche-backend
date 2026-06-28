@@ -1,0 +1,128 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model User {
+  id            String        @id @default(cuid())
+  name          String
+  email         String        @unique
+  phone         String?
+  passwordHash  String
+  role          UserRole      @default(CLIENT)
+  clientId      String?       @unique
+  client        Client?       @relation(fields: [clientId], references: [id], onDelete: SetNull)
+  active        Boolean       @default(true)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+}
+
+model Client {
+  id                  String               @id @default(cuid())
+  name                String
+  phone               String
+  user                User?
+  appointments        Appointment[]
+  recurringBookings   RecurringBooking[]
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
+}
+
+model Service {
+  id                  String               @id @default(cuid())
+  name                String
+  duration            Int
+  price               Decimal              @db.Decimal(10, 2)
+  active              Boolean              @default(true)
+  appointments        Appointment[]
+  recurringBookings   RecurringBooking[]
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
+}
+
+model Appointment {
+  id                  String               @id @default(cuid())
+  date                DateTime             @db.Date
+  start               String
+  end                 String
+  clientId            String?
+  clientName          String
+  serviceId           String
+  source              AppointmentSource
+  client              Client?              @relation(fields: [clientId], references: [id], onDelete: SetNull)
+  service             Service              @relation(fields: [serviceId], references: [id])
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
+
+  @@index([date, start])
+}
+
+model RecurringBooking {
+  id                  String               @id @default(cuid())
+  clientId            String
+  serviceId           String
+  weekday             Int
+  start               String
+  active              Boolean              @default(true)
+  client              Client               @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  service             Service              @relation(fields: [serviceId], references: [id])
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
+
+  @@index([weekday, start])
+}
+
+model ManualBlock {
+  id                  String               @id @default(cuid())
+  date                DateTime             @db.Date
+  start               String
+  end                 String
+  reason              String
+  createdAt           DateTime             @default(now())
+}
+
+model BusinessHour {
+  weekday             Int                  @id
+  open                String?
+  close               String?
+}
+
+model ClosedDate {
+  date                DateTime             @id @db.Date
+  reason              String?
+}
+
+model Product {
+  id                  String               @id @default(cuid())
+  name                String
+  image               String?
+  description         String?
+  price               Decimal              @db.Decimal(10, 2)
+  available           Boolean              @default(true)
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
+}
+
+model GalleryItem {
+  id                  String               @id @default(cuid())
+  title               String
+  image               String
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
+}
+
+enum AppointmentSource {
+  app
+  manual
+  recurring
+}
+
+enum UserRole {
+  ADMIN
+  CLIENT
+}

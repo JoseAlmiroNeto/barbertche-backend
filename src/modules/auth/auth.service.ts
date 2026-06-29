@@ -1,8 +1,8 @@
-import { BadRequestException, Injectable, UnauthorizedException } from "@nestjs/common";
+﻿import { BadRequestException, Injectable, UnauthorizedException } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { UserRole } from "@prisma/client";
 import { hashPassword, verifyPassword } from "../../security/password";
-import { signToken } from "../../security/token";
+import { signToken, verifyToken } from "../../security/token";
 import { PrismaService } from "../../storage/prisma.service";
 import { LoginDto } from "./dto/login.dto";
 import { RegisterDto } from "./dto/register.dto";
@@ -63,12 +63,30 @@ export class AuthService {
       throw new UnauthorizedException("E-mail ou senha invalidos.");
     }
 
-    const userWithClientId = user as typeof user & { clientId?: string | null };
-    const client = userWithClientId.clientId
-      ? await this.prisma.client.findUnique({ where: { id: userWithClientId.clientId } })
-      : null;
+    return this.buildAuthResponse(user, await this.findClientForUser(user));
+  }
 
-    return this.buildAuthResponse(user, client);
+  async me(authorization?: string) {
+    const token = authorization?.replace(/^Bearer\s+/i, "").trim();
+    const secret = this.config.get<string>("JWT_SECRET") ?? "dev-secret-change-me";
+    const payload = token ? verifyToken(token, secret) : null;
+
+    if (!payload) {
+      throw new UnauthorizedException("Sessao expirada. Entre novamente.");
+    }
+
+    const user = await this.prisma.user.findUnique({ where: { id: payload.sub } });
+    if (!user || !user.active) {
+      throw new UnauthorizedException("Usuario inativo ou nao encontrado.");
+    }
+
+    return this.buildAuthResponse(user, await this.findClientForUser(user), token);
+  }
+
+  private async findClientForUser(user: { clientId?: string | null }) {
+    return user.clientId
+      ? this.prisma.client.findUnique({ where: { id: user.clientId } })
+      : null;
   }
 
   private buildAuthResponse(user: {
@@ -77,10 +95,10 @@ export class AuthService {
     email: string;
     phone: string | null;
     role: UserRole;
-  }, client: { id: string; name: string; phone: string } | null) {
+  }, client: { id: string; name: string; phone: string } | null, existingToken?: string) {
     const secret = this.config.get<string>("JWT_SECRET") ?? "dev-secret-change-me";
     return {
-      token: signToken({ sub: user.id, role: user.role, email: user.email }, secret),
+      token: existingToken ?? signToken({ sub: user.id, role: user.role, email: user.email }, secret),
       user: {
         id: user.id,
         name: user.name,
@@ -92,3 +110,4 @@ export class AuthService {
     };
   }
 }
+

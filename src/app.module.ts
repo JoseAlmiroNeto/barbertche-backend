@@ -8,6 +8,7 @@ import { GalleryModule } from "./modules/gallery/gallery.module";
 import { ProductsModule } from "./modules/products/products.module";
 import { ServicesModule } from "./modules/services/services.module";
 import { SettingsModule } from "./modules/settings/settings.module";
+import { UploadsModule } from "./modules/uploads/uploads.module";
 import { StorageModule } from "./storage/storage.module";
 
 @Module({
@@ -20,8 +21,9 @@ import { StorageModule } from "./storage/storage.module";
     AppointmentsModule,
     SettingsModule,
     ProductsModule,
-    GalleryModule
+    GalleryModule,
+    UploadsModule,
   ],
-  controllers: [AppController]
+  controllers: [AppController],
 })
 export class AppModule {}

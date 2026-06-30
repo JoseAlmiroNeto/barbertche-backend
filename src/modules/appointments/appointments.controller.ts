@@ -1,4 +1,14 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from "@nestjs/common";
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Headers,
+  Param,
+  Patch,
+  Post,
+  Query,
+} from "@nestjs/common";
 import { AppointmentsService } from "./appointments.service";
 import { CreateAppointmentDto } from "./dto/create-appointment.dto";
 import { CreateRecurringBookingDto } from "./dto/create-recurring-booking.dto";
@@ -13,8 +23,16 @@ export class AppointmentsController {
     return this.appointmentsService.findAll(date);
   }
 
+  @Get("me")
+  findMine(@Headers("authorization") authorization?: string) {
+    return this.appointmentsService.findMine(authorization);
+  }
+
   @Get("availability")
-  getAvailability(@Query("date") date: string, @Query("serviceId") serviceId: string) {
+  getAvailability(
+    @Query("date") date: string,
+    @Query("serviceId") serviceId: string,
+  ) {
     return this.appointmentsService.getAvailability(date, serviceId);
   }
 
@@ -44,7 +62,10 @@ export class AppointmentsController {
   }
 
   @Patch("recurring/:id")
-  updateRecurring(@Param("id") id: string, @Body() dto: CreateRecurringBookingDto) {
+  updateRecurring(
+    @Param("id") id: string,
+    @Body() dto: CreateRecurringBookingDto,
+  ) {
     return this.appointmentsService.updateRecurring(id, dto);
   }
 

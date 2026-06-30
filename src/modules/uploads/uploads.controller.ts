@@ -7,8 +7,11 @@
   UseInterceptors,
 } from "@nestjs/common";
 import { FileInterceptor } from "@nestjs/platform-express";
+import { UserRole } from "@prisma/client";
+import { Roles } from "../../security/roles.decorator";
 import { UploadsService, type UploadedImageFile } from "./uploads.service";
 
+@Roles(UserRole.ADMIN)
 @Controller("uploads")
 export class UploadsController {
   constructor(private readonly uploadsService: UploadsService) {}

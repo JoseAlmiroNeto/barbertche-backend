@@ -1,7 +1,10 @@
-import { Body, Controller, Delete, Get, Param, Post } from "@nestjs/common";
+﻿import { Body, Controller, Delete, Get, Param, Post } from "@nestjs/common";
+import { UserRole } from "@prisma/client";
+import { Roles } from "../../security/roles.decorator";
 import { ClientsService } from "./clients.service";
 import { CreateClientDto } from "./dto/create-client.dto";
 
+@Roles(UserRole.ADMIN)
 @Controller("clients")
 export class ClientsController {
   constructor(private readonly clientsService: ClientsService) {}
@@ -21,3 +24,4 @@ export class ClientsController {
     return this.clientsService.remove(id);
   }
 }
+

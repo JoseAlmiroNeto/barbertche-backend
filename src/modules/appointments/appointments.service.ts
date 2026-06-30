@@ -1,12 +1,12 @@
-import {
+﻿import {
   BadRequestException,
   ConflictException,
   Injectable,
   NotFoundException,
+  ForbiddenException,
   UnauthorizedException,
 } from "@nestjs/common";
-import { ConfigService } from "@nestjs/config";
-import { AppointmentSource, Prisma } from "@prisma/client";
+import { AppointmentSource, Prisma, UserRole } from "@prisma/client";
 import {
   addMinutes,
   overlaps,
@@ -15,7 +15,7 @@ import {
   weekdayOf,
 } from "../../domain/time";
 import type { Interval } from "../../domain/types";
-import { verifyToken } from "../../security/token";
+import type { AuthenticatedUser } from "../../security/auth.types";
 import {
   mapAppointment,
   mapRecurringBooking,
@@ -34,10 +34,7 @@ type ActiveService = {
 
 @Injectable()
 export class AppointmentsService {
-  constructor(
-    private readonly prisma: PrismaService,
-    private readonly config: ConfigService,
-  ) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   async findAll(date?: string) {
     if (!date) {
@@ -50,8 +47,8 @@ export class AppointmentsService {
     return this.getBookingsForDate(this.prisma, date);
   }
 
-  async findMine(authorization?: string) {
-    const clientId = await this.getAuthenticatedClientId(authorization);
+  async findMine(user: AuthenticatedUser) {
+    const clientId = this.getAuthenticatedClientId(user);
     const [appointments, recurring] = await Promise.all([
       this.prisma.appointment.findMany({
         where: { clientId },
@@ -90,16 +87,18 @@ export class AppointmentsService {
     return slots;
   }
 
-  async create(dto: CreateAppointmentDto) {
+  async create(dto: CreateAppointmentDto, user: AuthenticatedUser) {
+    const appointmentDto = this.applyAppointmentOwner(dto, user);
+
     return this.prisma.$transaction(
       async (tx) => {
-        await this.lockScheduleDate(tx, dto.date);
+        await this.lockScheduleDate(tx, appointmentDto.date);
 
-        const service = await this.getService(tx, dto.serviceId);
-        const client = dto.clientId
-          ? await tx.client.findUnique({ where: { id: dto.clientId } })
+        const service = await this.getService(tx, appointmentDto.serviceId);
+        const client = appointmentDto.clientId
+          ? await tx.client.findUnique({ where: { id: appointmentDto.clientId } })
           : undefined;
-        const clientName = dto.clientName ?? client?.name;
+        const clientName = appointmentDto.clientName ?? client?.name;
 
         if (!clientName) {
           throw new BadRequestException(
@@ -107,20 +106,27 @@ export class AppointmentsService {
           );
         }
 
-        if (!(await this.canUseSlot(tx, dto.date, dto.start, service))) {
+        if (
+          !(await this.canUseSlot(
+            tx,
+            appointmentDto.date,
+            appointmentDto.start,
+            service,
+          ))
+        ) {
           throw new ConflictException("Horario indisponivel.");
         }
 
         const appointment = await tx.appointment.create({
           data: {
-            date: toDbDate(dto.date),
-            start: dto.start,
-            end: addMinutes(dto.start, service.duration),
-            clientId: dto.clientId,
+            date: toDbDate(appointmentDto.date),
+            start: appointmentDto.start,
+            end: addMinutes(appointmentDto.start, service.duration),
+            clientId: appointmentDto.clientId,
             clientName,
             serviceId: service.id,
             source:
-              dto.source === "manual"
+              appointmentDto.source === "manual"
                 ? AppointmentSource.manual
                 : AppointmentSource.app,
           },
@@ -132,14 +138,20 @@ export class AppointmentsService {
     );
   }
 
-  async reschedule(id: string, dto: RescheduleAppointmentDto) {
+  async reschedule(
+    id: string,
+    dto: RescheduleAppointmentDto,
+    user: AuthenticatedUser,
+  ) {
     return this.prisma.$transaction(
       async (tx) => {
         await this.lockScheduleDate(tx, dto.date);
 
         const appointment = await this.getAppointment(tx, id);
-        if (mapAppointment(appointment).date !== dto.date) {
-          await this.lockScheduleDate(tx, mapAppointment(appointment).date);
+        this.ensureCanManageAppointment(appointment, user);
+        const currentDate = mapAppointment(appointment).date;
+        if (currentDate !== dto.date) {
+          await this.lockScheduleDate(tx, currentDate);
         }
 
         const service = await this.getService(tx, appointment.serviceId);
@@ -162,8 +174,9 @@ export class AppointmentsService {
     );
   }
 
-  async remove(id: string) {
-    await this.getAppointment(this.prisma, id);
+  async remove(id: string, user: AuthenticatedUser) {
+    const appointment = await this.getAppointment(this.prisma, id);
+    this.ensureCanManageAppointment(appointment, user);
     await this.prisma.appointment.delete({ where: { id } });
     return { deleted: true };
   }
@@ -288,27 +301,40 @@ export class AppointmentsService {
     return { deleted: true };
   }
 
-  private async getAuthenticatedClientId(authorization?: string) {
-    const token = authorization?.replace(/^Bearer\s+/i, "").trim();
-    const secret =
-      this.config.get<string>("JWT_SECRET") ?? "dev-secret-change-me";
-    const payload = token ? verifyToken(token, secret) : null;
-
-    if (!payload) {
-      throw new UnauthorizedException("Sessao expirada. Entre novamente.");
-    }
-
-    const user = await this.prisma.user.findUnique({
-      where: { id: payload.sub },
-    });
-    const userWithClient = user as typeof user & { clientId?: string | null };
-    if (!user || !user.active || !userWithClient.clientId) {
+  private getAuthenticatedClientId(user: AuthenticatedUser) {
+    if (!user.clientId) {
       throw new UnauthorizedException("Cliente autenticado nao encontrado.");
     }
 
-    return userWithClient.clientId;
+    return user.clientId;
   }
 
+  private applyAppointmentOwner(dto: CreateAppointmentDto, user: AuthenticatedUser) {
+    if (user.role === UserRole.ADMIN) {
+      return dto;
+    }
+
+    const clientId = this.getAuthenticatedClientId(user);
+    return {
+      ...dto,
+      clientId,
+      clientName: undefined,
+      source: "app" as const,
+    };
+  }
+
+  private ensureCanManageAppointment(
+    appointment: { clientId: string | null },
+    user: AuthenticatedUser,
+  ) {
+    if (user.role === UserRole.ADMIN) {
+      return;
+    }
+
+    if (!user.clientId || appointment.clientId !== user.clientId) {
+      throw new ForbiddenException("Voce nao tem permissao para alterar este agendamento.");
+    }
+  }
   private async canUseSlot(
     db: Db,
     date: string,
@@ -521,3 +547,6 @@ export class AppointmentsService {
     await db.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${`recurring:${weekday}`}))`;
   }
 }
+
+
+

@@ -1,11 +1,15 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
+﻿import { Injectable, NotFoundException } from "@nestjs/common";
 import { mapGalleryItem } from "../../storage/prisma-mappers";
 import { PrismaService } from "../../storage/prisma.service";
+import { UploadsService } from "../uploads/uploads.service";
 import { CreateGalleryItemDto } from "./dto/create-gallery-item.dto";
 
 @Injectable()
 export class GalleryService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly uploadsService: UploadsService,
+  ) {}
 
   async findAll() {
     const items = await this.prisma.galleryItem.findMany({ orderBy: { createdAt: "desc" } });
@@ -24,6 +28,11 @@ export class GalleryService {
     }
 
     const updated = await this.prisma.galleryItem.update({ where: { id }, data: dto });
+
+    if (dto.image && dto.image !== item.image) {
+      await this.uploadsService.removePublicImage(item.image);
+    }
+
     return mapGalleryItem(updated);
   }
 
@@ -33,7 +42,9 @@ export class GalleryService {
       throw new NotFoundException("Imagem nao encontrada.");
     }
 
+    await this.uploadsService.removePublicImage(exists.image);
     await this.prisma.galleryItem.delete({ where: { id } });
     return { deleted: true };
   }
 }
+

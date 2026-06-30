@@ -1,4 +1,4 @@
-﻿import { BadRequestException, Injectable, InternalServerErrorException } from "@nestjs/common";
+﻿import { BadRequestException, Injectable, InternalServerErrorException, Logger } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { randomUUID } from "node:crypto";
 import { extname } from "node:path";
@@ -17,6 +17,8 @@ type UploadResult = {
 
 @Injectable()
 export class UploadsService {
+  private readonly logger = new Logger(UploadsService.name);
+
   constructor(private readonly config: ConfigService) {}
 
   async uploadImage(file: UploadedImageFile, folder = "uploads"): Promise<UploadResult> {
@@ -59,11 +61,74 @@ export class UploadsService {
     };
   }
 
+  async removePublicImage(imageUrl?: string | null): Promise<void> {
+    const objectPath = this.getManagedObjectPath(imageUrl);
+    if (!objectPath) {
+      return;
+    }
+
+    const supabaseUrl = this.normalizeSupabaseUrl(
+      this.config.get<string>("SUPABASE_URL"),
+    );
+    const serviceKey = this.config.get<string>("SUPABASE_SERVICE_ROLE_KEY");
+    const bucket = this.config.get<string>("SUPABASE_STORAGE_BUCKET") ?? "barbertche-images";
+
+    if (!supabaseUrl || !serviceKey) {
+      throw new InternalServerErrorException("Storage de imagens nao configurado no servidor.");
+    }
+
+    const response = await fetch(`${supabaseUrl}/storage/v1/object/${bucket}`, {
+      method: "DELETE",
+      headers: {
+        apikey: serviceKey,
+        Authorization: `Bearer ${serviceKey}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ prefixes: [objectPath] })
+    });
+
+    if (!response.ok) {
+      const message = await response.text().catch(() => "");
+      throw new BadRequestException(message || "Nao foi possivel remover a imagem do storage.");
+    }
+  }
+
   private normalizeSupabaseUrl(url?: string) {
     return url
       ?.trim()
       .replace(/\/+$/, "")
       .replace(/\/rest\/v1$/i, "");
+  }
+
+  private getManagedObjectPath(imageUrl?: string | null) {
+    if (!imageUrl) {
+      return null;
+    }
+
+    const supabaseUrl = this.normalizeSupabaseUrl(
+      this.config.get<string>("SUPABASE_URL"),
+    );
+    const bucket = this.config.get<string>("SUPABASE_STORAGE_BUCKET") ?? "barbertche-images";
+
+    if (!supabaseUrl) {
+      return null;
+    }
+
+    try {
+      const parsedUrl = new URL(imageUrl);
+      const expectedBaseUrl = new URL(supabaseUrl);
+      const publicPrefix = `/storage/v1/object/public/${bucket}/`;
+
+      if (parsedUrl.origin !== expectedBaseUrl.origin || !parsedUrl.pathname.startsWith(publicPrefix)) {
+        return null;
+      }
+
+      const objectPath = decodeURIComponent(parsedUrl.pathname.slice(publicPrefix.length));
+      return objectPath || null;
+    } catch (error) {
+      this.logger.warn(`URL de imagem ignorada ao remover storage: ${imageUrl}`);
+      return null;
+    }
   }
 
   private cleanFolder(folder: string) {
@@ -94,4 +159,5 @@ export class UploadsService {
     return ".jpg";
   }
 }
+
 

@@ -1,11 +1,15 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
+﻿import { Injectable, NotFoundException } from "@nestjs/common";
 import { mapProduct } from "../../storage/prisma-mappers";
 import { PrismaService } from "../../storage/prisma.service";
+import { UploadsService } from "../uploads/uploads.service";
 import { CreateProductDto } from "./dto/create-product.dto";
 
 @Injectable()
 export class ProductsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly uploadsService: UploadsService,
+  ) {}
 
   async findAll() {
     const products = await this.prisma.product.findMany({ orderBy: { name: "asc" } });
@@ -32,6 +36,11 @@ export class ProductsService {
     }
 
     const updated = await this.prisma.product.update({ where: { id }, data: dto });
+
+    if (dto.image && dto.image !== product.image) {
+      await this.uploadsService.removePublicImage(product.image);
+    }
+
     return mapProduct(updated);
   }
 
@@ -41,7 +50,9 @@ export class ProductsService {
       throw new NotFoundException("Produto nao encontrado.");
     }
 
+    await this.uploadsService.removePublicImage(exists.image);
     await this.prisma.product.delete({ where: { id } });
     return { deleted: true };
   }
 }
+

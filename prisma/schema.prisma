@@ -18,6 +18,9 @@ model User {
   clientId      String?       @unique
   client        Client?       @relation(fields: [clientId], references: [id], onDelete: SetNull)
   active        Boolean       @default(true)
+  termsAcceptedAt DateTime?
+  termsVersion    String?
+  privacyVersion  String?
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt
 }
@@ -126,3 +129,4 @@ enum UserRole {
   ADMIN
   CLIENT
 }
+

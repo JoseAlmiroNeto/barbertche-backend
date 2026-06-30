@@ -6,6 +6,9 @@ import { PrismaService } from "../../storage/prisma.service";
 import { LoginDto } from "./dto/login.dto";
 import { RegisterDto } from "./dto/register.dto";
 
+const currentTermsVersion = "2026-06-30";
+const currentPrivacyVersion = "2026-06-30";
+
 @Injectable()
 export class AuthService {
   constructor(
@@ -40,7 +43,10 @@ export class AuthService {
           passwordHash: hashPassword(dto.password),
           role: UserRole.CLIENT,
           clientId: client.id,
-          active: true
+          active: true,
+          termsAcceptedAt: new Date(),
+          termsVersion: currentTermsVersion,
+          privacyVersion: currentPrivacyVersion
         } as never
       });
     });
@@ -100,5 +106,6 @@ export class AuthService {
     };
   }
 }
+
 
 

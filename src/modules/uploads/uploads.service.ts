@@ -24,7 +24,9 @@ export class UploadsService {
       throw new BadRequestException("Envie apenas arquivos de imagem.");
     }
 
-    const supabaseUrl = this.config.get<string>("SUPABASE_URL")?.replace(/\/$/, "");
+    const supabaseUrl = this.normalizeSupabaseUrl(
+      this.config.get<string>("SUPABASE_URL"),
+    );
     const serviceKey = this.config.get<string>("SUPABASE_SERVICE_ROLE_KEY");
     const bucket = this.config.get<string>("SUPABASE_STORAGE_BUCKET") ?? "barbertche-images";
 
@@ -57,12 +59,19 @@ export class UploadsService {
     };
   }
 
+  private normalizeSupabaseUrl(url?: string) {
+    return url
+      ?.trim()
+      .replace(/\/+$/, "")
+      .replace(/\/rest\/v1$/i, "");
+  }
+
   private cleanFolder(folder: string) {
     const cleaned = folder
       .trim()
       .toLowerCase()
       .replace(/[^a-z0-9/_-]/g, "-")
-      .replace(/\/+/, "/")
+      .replace(/\/+/g, "/")
       .replace(/^\/+|\/+$/g, "");
 
     return cleaned || "uploads";
@@ -85,3 +94,4 @@ export class UploadsService {
     return ".jpg";
   }
 }
+

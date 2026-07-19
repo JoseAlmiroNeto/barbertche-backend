@@ -1,0 +1,2502 @@
+{
+  "openapi": "3.0.0",
+  "paths": {
+    "/api/health": {
+      "get": {
+        "operationId": "AppController_health",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "health"
+        ]
+      }
+    },
+    "/api/auth/register": {
+      "post": {
+        "operationId": "AuthController_register",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/api/auth/login": {
+      "post": {
+        "operationId": "AuthController_login",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/api/auth/refresh": {
+      "post": {
+        "operationId": "AuthController_refresh",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RefreshTokenDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/api/auth/me": {
+      "get": {
+        "operationId": "AuthController_me",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthMeResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/api/auth/logout": {
+      "post": {
+        "operationId": "AuthController_logout",
+        "parameters": [],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/api/auth/push-token": {
+      "post": {
+        "operationId": "AuthController_savePushToken",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PushTokenDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PushTokenResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "auth"
+        ]
+      },
+      "delete": {
+        "operationId": "AuthController_removePushToken",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RemovePushTokenDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/api/clients": {
+      "get": {
+        "operationId": "ClientsController_findAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ClientResponseDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "clients"
+        ]
+      },
+      "post": {
+        "operationId": "ClientsController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateClientDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "clients"
+        ]
+      }
+    },
+    "/api/clients/{id}": {
+      "patch": {
+        "operationId": "ClientsController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateClientDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "clients"
+        ]
+      },
+      "delete": {
+        "operationId": "ClientsController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeletedResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "clients"
+        ]
+      }
+    },
+    "/api/services": {
+      "get": {
+        "operationId": "ServicesController_findAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ServiceResponseDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "services"
+        ]
+      },
+      "post": {
+        "operationId": "ServicesController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateServiceDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "services"
+        ]
+      }
+    },
+    "/api/services/{id}": {
+      "patch": {
+        "operationId": "ServicesController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateServiceDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "services"
+        ]
+      },
+      "delete": {
+        "operationId": "ServicesController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeletedResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "services"
+        ]
+      }
+    },
+    "/api/appointments": {
+      "get": {
+        "operationId": "AppointmentsController_findAll",
+        "parameters": [
+          {
+            "name": "date",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AppointmentResponseDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "appointments"
+        ]
+      },
+      "post": {
+        "operationId": "AppointmentsController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateAppointmentDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AppointmentResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "appointments"
+        ]
+      }
+    },
+    "/api/appointments/me": {
+      "get": {
+        "operationId": "AppointmentsController_findMine",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MyAppointmentsResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "appointments"
+        ]
+      }
+    },
+    "/api/appointments/availability": {
+      "get": {
+        "operationId": "AppointmentsController_getAvailability",
+        "parameters": [
+          {
+            "name": "date",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "name": "serviceId",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "example": "09:00"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "appointments"
+        ]
+      }
+    },
+    "/api/appointments/{id}/reschedule": {
+      "patch": {
+        "operationId": "AppointmentsController_reschedule",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RescheduleAppointmentDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AppointmentResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "appointments"
+        ]
+      }
+    },
+    "/api/appointments/{id}": {
+      "delete": {
+        "operationId": "AppointmentsController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AppointmentResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "appointments"
+        ]
+      }
+    },
+    "/api/appointments/{id}/status": {
+      "patch": {
+        "operationId": "AppointmentsController_updateStatus",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateAppointmentStatusDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AppointmentResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "appointments"
+        ]
+      }
+    },
+    "/api/appointments/recurring": {
+      "get": {
+        "operationId": "AppointmentsController_findRecurring",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/RecurringBookingResponseDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "appointments"
+        ]
+      },
+      "post": {
+        "operationId": "AppointmentsController_createRecurring",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateRecurringBookingDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecurringBookingResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "appointments"
+        ]
+      }
+    },
+    "/api/appointments/recurring/{id}": {
+      "patch": {
+        "operationId": "AppointmentsController_updateRecurring",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateRecurringBookingDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecurringBookingResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "appointments"
+        ]
+      },
+      "delete": {
+        "operationId": "AppointmentsController_removeRecurring",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeletedResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "appointments"
+        ]
+      }
+    },
+    "/api/notifications/preferences": {
+      "get": {
+        "operationId": "NotificationsController_getPreferences",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotificationPreferencesResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "notifications"
+        ]
+      },
+      "patch": {
+        "operationId": "NotificationsController_updatePreferences",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateNotificationPreferencesDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotificationPreferencesResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "notifications"
+        ]
+      }
+    },
+    "/api/notifications/promotions": {
+      "post": {
+        "operationId": "NotificationsController_createPromotion",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreatePromotionDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PromotionQueuedResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "notifications"
+        ]
+      }
+    },
+    "/api/settings": {
+      "get": {
+        "operationId": "SettingsController_getSettings",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SettingsResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "settings"
+        ]
+      }
+    },
+    "/api/settings/business-hours": {
+      "patch": {
+        "operationId": "SettingsController_updateBusinessHour",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateBusinessHourDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "allOf": [
+                      {
+                        "$ref": "#/components/schemas/BusinessHourResponseDto"
+                      }
+                    ],
+                    "nullable": true
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "settings"
+        ]
+      }
+    },
+    "/api/settings/closed-dates": {
+      "post": {
+        "operationId": "SettingsController_addClosedDate",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateClosedDateDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ClosedDateResponseDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "settings"
+        ]
+      }
+    },
+    "/api/settings/closed-dates/{date}": {
+      "delete": {
+        "operationId": "SettingsController_removeClosedDate",
+        "parameters": [
+          {
+            "name": "date",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ClosedDateResponseDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "settings"
+        ]
+      }
+    },
+    "/api/settings/blocks": {
+      "post": {
+        "operationId": "SettingsController_addBlock",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateBlockDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ManualBlockResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "settings"
+        ]
+      }
+    },
+    "/api/settings/blocks/{id}": {
+      "delete": {
+        "operationId": "SettingsController_removeBlock",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeletedResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "settings"
+        ]
+      }
+    },
+    "/api/products": {
+      "get": {
+        "operationId": "ProductsController_findAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ProductResponseDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "products"
+        ]
+      },
+      "post": {
+        "operationId": "ProductsController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateProductDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "products"
+        ]
+      }
+    },
+    "/api/products/{id}": {
+      "patch": {
+        "operationId": "ProductsController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateProductDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "products"
+        ]
+      },
+      "delete": {
+        "operationId": "ProductsController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeletedResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "products"
+        ]
+      }
+    },
+    "/api/uploads/image": {
+      "post": {
+        "operationId": "UploadsController_uploadImage",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "file"
+                ],
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary"
+                  },
+                  "folder": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UploadResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "uploads"
+        ]
+      }
+    },
+    "/api/gallery": {
+      "get": {
+        "operationId": "GalleryController_findAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/GalleryItemResponseDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "gallery"
+        ]
+      },
+      "post": {
+        "operationId": "GalleryController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateGalleryItemDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GalleryItemResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "gallery"
+        ]
+      }
+    },
+    "/api/gallery/{id}": {
+      "patch": {
+        "operationId": "GalleryController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateGalleryItemDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GalleryItemResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "gallery"
+        ]
+      },
+      "delete": {
+        "operationId": "GalleryController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeletedResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "gallery"
+        ]
+      }
+    }
+  },
+  "info": {
+    "title": "BarberTchê API",
+    "description": "Contrato HTTP do backend BarberTchê.",
+    "version": "1.0.0",
+    "contact": {}
+  },
+  "tags": [],
+  "servers": [],
+  "components": {
+    "securitySchemes": {
+      "bearer": {
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "type": "http"
+      }
+    },
+    "schemas": {
+      "HealthResponseDto": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "example": "ok"
+          },
+          "service": {
+            "type": "string",
+            "example": "barbertche-back"
+          }
+        },
+        "required": [
+          "status",
+          "service"
+        ]
+      },
+      "RegisterDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 120
+          },
+          "phone": {
+            "type": "string",
+            "maxLength": 30
+          },
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "password": {
+            "type": "string",
+            "minLength": 8
+          },
+          "passwordConfirmation": {
+            "type": "string",
+            "minLength": 8
+          },
+          "termsAccepted": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "name",
+          "phone",
+          "email",
+          "password",
+          "passwordConfirmation",
+          "termsAccepted"
+        ]
+      },
+      "ClientResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "phone": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "phone"
+        ]
+      },
+      "AuthUserResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "phone": {
+            "type": "string",
+            "nullable": true
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "ADMIN",
+              "CLIENT"
+            ]
+          },
+          "client": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ClientResponseDto"
+              }
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "email",
+          "phone",
+          "role",
+          "client"
+        ]
+      },
+      "AuthResponseDto": {
+        "type": "object",
+        "properties": {
+          "accessToken": {
+            "type": "string"
+          },
+          "refreshToken": {
+            "type": "string"
+          },
+          "user": {
+            "$ref": "#/components/schemas/AuthUserResponseDto"
+          }
+        },
+        "required": [
+          "accessToken",
+          "refreshToken",
+          "user"
+        ]
+      },
+      "LoginDto": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "password": {
+            "type": "string",
+            "minLength": 8
+          }
+        },
+        "required": [
+          "email",
+          "password"
+        ]
+      },
+      "RefreshTokenDto": {
+        "type": "object",
+        "properties": {
+          "refreshToken": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "refreshToken"
+        ]
+      },
+      "AuthMeResponseDto": {
+        "type": "object",
+        "properties": {
+          "user": {
+            "$ref": "#/components/schemas/AuthUserResponseDto"
+          }
+        },
+        "required": [
+          "user"
+        ]
+      },
+      "PushTokenDto": {
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string",
+            "maxLength": 512
+          },
+          "platform": {
+            "type": "string",
+            "enum": [
+              "android",
+              "ios"
+            ]
+          },
+          "deviceId": {
+            "type": "string",
+            "maxLength": 200
+          }
+        },
+        "required": [
+          "token",
+          "platform"
+        ]
+      },
+      "PushTokenResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "platform": {
+            "type": "string",
+            "enum": [
+              "android",
+              "ios"
+            ]
+          },
+          "deviceId": {
+            "type": "string",
+            "nullable": true
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "platform",
+          "updatedAt"
+        ]
+      },
+      "RemovePushTokenDto": {
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string",
+            "maxLength": 512
+          }
+        },
+        "required": [
+          "token"
+        ]
+      },
+      "CreateClientDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 120
+          },
+          "phone": {
+            "type": "string",
+            "maxLength": 30
+          }
+        },
+        "required": [
+          "name",
+          "phone"
+        ]
+      },
+      "UpdateClientDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 120
+          },
+          "phone": {
+            "type": "string",
+            "maxLength": 30
+          }
+        }
+      },
+      "DeletedResponseDto": {
+        "type": "object",
+        "properties": {
+          "deleted": {
+            "type": "boolean",
+            "example": true
+          }
+        },
+        "required": [
+          "deleted"
+        ]
+      },
+      "ServiceResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "duration": {
+            "type": "number"
+          },
+          "price": {
+            "type": "number"
+          },
+          "active": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "duration",
+          "price",
+          "active"
+        ]
+      },
+      "CreateServiceDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 120
+          },
+          "duration": {
+            "type": "number",
+            "minimum": 1
+          },
+          "price": {
+            "type": "number",
+            "minimum": 0
+          },
+          "active": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "name",
+          "duration",
+          "price"
+        ]
+      },
+      "UpdateServiceDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 120
+          },
+          "duration": {
+            "type": "number",
+            "minimum": 1
+          },
+          "price": {
+            "type": "number",
+            "minimum": 0
+          },
+          "active": {
+            "type": "boolean"
+          }
+        }
+      },
+      "AppointmentResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "date": {
+            "type": "string",
+            "format": "date"
+          },
+          "start": {
+            "type": "string",
+            "example": "09:00"
+          },
+          "end": {
+            "type": "string",
+            "example": "09:30"
+          },
+          "clientId": {
+            "type": "string",
+            "nullable": true
+          },
+          "clientName": {
+            "type": "string"
+          },
+          "serviceId": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "app",
+              "manual",
+              "recurring"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "SCHEDULED",
+              "COMPLETED",
+              "CANCELED",
+              "NO_SHOW"
+            ]
+          },
+          "canceledAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "completedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "cancellationReason": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "date",
+          "start",
+          "end",
+          "clientName",
+          "serviceId",
+          "source",
+          "status"
+        ]
+      },
+      "RecurringBookingResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "clientId": {
+            "type": "string"
+          },
+          "serviceId": {
+            "type": "string"
+          },
+          "weekday": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 6
+          },
+          "start": {
+            "type": "string",
+            "example": "09:00"
+          },
+          "active": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "clientId",
+          "serviceId",
+          "weekday",
+          "start",
+          "active"
+        ]
+      },
+      "MyAppointmentsResponseDto": {
+        "type": "object",
+        "properties": {
+          "appointments": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AppointmentResponseDto"
+            }
+          },
+          "recurring": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RecurringBookingResponseDto"
+            }
+          }
+        },
+        "required": [
+          "appointments",
+          "recurring"
+        ]
+      },
+      "CreateAppointmentDto": {
+        "type": "object",
+        "properties": {
+          "date": {
+            "type": "string"
+          },
+          "start": {
+            "type": "string"
+          },
+          "serviceId": {
+            "type": "string"
+          },
+          "clientId": {
+            "type": "string"
+          },
+          "clientName": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "app",
+              "manual"
+            ]
+          }
+        },
+        "required": [
+          "date",
+          "start",
+          "serviceId"
+        ]
+      },
+      "RescheduleAppointmentDto": {
+        "type": "object",
+        "properties": {
+          "date": {
+            "type": "string"
+          },
+          "start": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "date",
+          "start"
+        ]
+      },
+      "AppointmentStatus": {
+        "type": "string",
+        "enum": [
+          "SCHEDULED",
+          "COMPLETED",
+          "CANCELED",
+          "NO_SHOW"
+        ]
+      },
+      "UpdateAppointmentStatusDto": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/AppointmentStatus"
+              }
+            ]
+          },
+          "cancellationReason": {
+            "type": "string",
+            "maxLength": 200
+          }
+        },
+        "required": [
+          "status"
+        ]
+      },
+      "CreateRecurringBookingDto": {
+        "type": "object",
+        "properties": {
+          "clientId": {
+            "type": "string"
+          },
+          "serviceId": {
+            "type": "string"
+          },
+          "weekday": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 6
+          },
+          "start": {
+            "type": "string"
+          },
+          "active": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "clientId",
+          "serviceId",
+          "weekday",
+          "start"
+        ]
+      },
+      "NotificationPreferencesResponseDto": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "string"
+          },
+          "reminders": {
+            "type": "boolean"
+          },
+          "appointmentChanges": {
+            "type": "boolean"
+          },
+          "promotions": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "userId",
+          "reminders",
+          "appointmentChanges",
+          "promotions"
+        ]
+      },
+      "UpdateNotificationPreferencesDto": {
+        "type": "object",
+        "properties": {
+          "reminders": {
+            "type": "boolean"
+          },
+          "appointmentChanges": {
+            "type": "boolean"
+          },
+          "promotions": {
+            "type": "boolean"
+          }
+        }
+      },
+      "CreatePromotionDto": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 80
+          },
+          "body": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 240
+          },
+          "data": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        },
+        "required": [
+          "title",
+          "body"
+        ]
+      },
+      "PromotionQueuedResponseDto": {
+        "type": "object",
+        "properties": {
+          "queued": {
+            "type": "number",
+            "minimum": 0
+          }
+        },
+        "required": [
+          "queued"
+        ]
+      },
+      "BusinessHourResponseDto": {
+        "type": "object",
+        "properties": {
+          "open": {
+            "type": "string",
+            "example": "09:00"
+          },
+          "close": {
+            "type": "string",
+            "example": "19:00"
+          }
+        },
+        "required": [
+          "open",
+          "close"
+        ]
+      },
+      "ClosedDateResponseDto": {
+        "type": "object",
+        "properties": {
+          "date": {
+            "type": "string",
+            "format": "date"
+          },
+          "reason": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "date"
+        ]
+      },
+      "ManualBlockResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "date": {
+            "type": "string",
+            "format": "date"
+          },
+          "start": {
+            "type": "string",
+            "example": "12:00"
+          },
+          "end": {
+            "type": "string",
+            "example": "13:00"
+          },
+          "reason": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "date",
+          "start",
+          "end",
+          "reason"
+        ]
+      },
+      "SettingsResponseDto": {
+        "type": "object",
+        "properties": {
+          "businessHours": {
+            "type": "object",
+            "additionalProperties": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/BusinessHourResponseDto"
+                }
+              ],
+              "nullable": true
+            }
+          },
+          "closedDates": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ClosedDateResponseDto"
+            }
+          },
+          "blocks": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ManualBlockResponseDto"
+            }
+          }
+        },
+        "required": [
+          "businessHours",
+          "closedDates",
+          "blocks"
+        ]
+      },
+      "UpdateBusinessHourDto": {
+        "type": "object",
+        "properties": {
+          "weekday": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 6
+          },
+          "open": {
+            "type": "string"
+          },
+          "close": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "weekday"
+        ]
+      },
+      "CreateClosedDateDto": {
+        "type": "object",
+        "properties": {
+          "date": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string",
+            "maxLength": 160
+          }
+        },
+        "required": [
+          "date"
+        ]
+      },
+      "CreateBlockDto": {
+        "type": "object",
+        "properties": {
+          "date": {
+            "type": "string"
+          },
+          "start": {
+            "type": "string"
+          },
+          "end": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string",
+            "maxLength": 160
+          }
+        },
+        "required": [
+          "date",
+          "start",
+          "end",
+          "reason"
+        ]
+      },
+      "ProductResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "image": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "price": {
+            "type": "number"
+          },
+          "available": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "price",
+          "available"
+        ]
+      },
+      "CreateProductDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 120
+          },
+          "price": {
+            "type": "number",
+            "minimum": 0
+          },
+          "image": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "available": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "name",
+          "price"
+        ]
+      },
+      "UpdateProductDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 120
+          },
+          "price": {
+            "type": "number",
+            "minimum": 0
+          },
+          "image": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "available": {
+            "type": "boolean"
+          }
+        }
+      },
+      "UploadResponseDto": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "path",
+          "url"
+        ]
+      },
+      "GalleryItemResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "image": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "image"
+        ]
+      },
+      "CreateGalleryItemDto": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "maxLength": 120
+          },
+          "image": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "title",
+          "image"
+        ]
+      },
+      "UpdateGalleryItemDto": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "maxLength": 120
+          },
+          "image": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

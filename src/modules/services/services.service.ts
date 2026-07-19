@@ -1,7 +1,8 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
+import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
 import { mapService } from "../../storage/prisma-mappers";
 import { PrismaService } from "../../storage/prisma.service";
 import { CreateServiceDto } from "./dto/create-service.dto";
+import { UpdateServiceDto } from "./dto/update-service.dto";
 
 @Injectable()
 export class ServicesService {
@@ -26,13 +27,16 @@ export class ServicesService {
         name: dto.name,
         duration: dto.duration,
         price: dto.price,
-        active: dto.active ?? true
-      }
+        active: dto.active ?? true,
+      },
     });
     return mapService(service);
   }
 
-  async update(id: string, dto: Partial<CreateServiceDto>) {
+  async update(id: string, dto: UpdateServiceDto) {
+    if (Object.keys(dto).length === 0) {
+      throw new BadRequestException("Informe ao menos um campo para atualizar.");
+    }
     await this.findOne(id);
     const service = await this.prisma.service.update({ where: { id }, data: dto });
     return mapService(service);

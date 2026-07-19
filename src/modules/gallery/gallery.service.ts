@@ -1,8 +1,9 @@
-﻿import { Injectable, NotFoundException } from "@nestjs/common";
+import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
 import { mapGalleryItem } from "../../storage/prisma-mappers";
 import { PrismaService } from "../../storage/prisma.service";
 import { UploadsService } from "../uploads/uploads.service";
 import { CreateGalleryItemDto } from "./dto/create-gallery-item.dto";
+import { UpdateGalleryItemDto } from "./dto/update-gallery-item.dto";
 
 @Injectable()
 export class GalleryService {
@@ -21,7 +22,10 @@ export class GalleryService {
     return mapGalleryItem(item);
   }
 
-  async update(id: string, dto: Partial<CreateGalleryItemDto>) {
+  async update(id: string, dto: UpdateGalleryItemDto) {
+    if (Object.keys(dto).length === 0) {
+      throw new BadRequestException("Informe ao menos um campo para atualizar.");
+    }
     const item = await this.prisma.galleryItem.findUnique({ where: { id } });
     if (!item) {
       throw new NotFoundException("Imagem nao encontrada.");
@@ -47,4 +51,3 @@ export class GalleryService {
     return { deleted: true };
   }
 }
-

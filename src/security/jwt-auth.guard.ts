@@ -35,9 +35,15 @@ export class JwtAuthGuard implements CanActivate {
 
     try {
       const payload = await this.jwtService.verifyAsync<JwtPayload>(token);
-      const user = await this.prisma.user.findUnique({ where: { id: payload.sub } });
+      if (payload.type !== "access" || !payload.sid) {
+        throw new UnauthorizedException("Token invalido.");
+      }
+      const [user, session] = await Promise.all([
+        this.prisma.user.findUnique({ where: { id: payload.sub } }),
+        this.prisma.authSession.findUnique({ where: { id: payload.sid } }),
+      ]);
 
-      if (!user || !user.active) {
+      if (!user || !user.active || !session || session.userId !== user.id || session.revokedAt || session.expiresAt <= new Date()) {
         throw new UnauthorizedException("Usuario inativo ou nao encontrado.");
       }
 
@@ -46,6 +52,7 @@ export class JwtAuthGuard implements CanActivate {
         email: user.email,
         role: user.role,
         clientId: user.clientId,
+        sessionId: session.id,
       };
 
       return true;

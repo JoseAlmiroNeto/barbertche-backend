@@ -1,4 +1,9 @@
 export type AppointmentSource = "app" | "manual" | "recurring";
+export type AppointmentStatus =
+  | "SCHEDULED"
+  | "COMPLETED"
+  | "CANCELED"
+  | "NO_SHOW";
 
 export type Client = {
   id: string;
@@ -23,6 +28,10 @@ export type Appointment = {
   clientName: string;
   serviceId: string;
   source: AppointmentSource;
+  status: AppointmentStatus;
+  canceledAt?: string | null;
+  completedAt?: string | null;
+  cancellationReason?: string | null;
 };
 
 export type RecurringBooking = {

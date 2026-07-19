@@ -2,6 +2,7 @@
 import { APP_GUARD } from "@nestjs/core";
 import { ThrottlerModule } from "@nestjs/throttler";
 import { ConfigModule } from "@nestjs/config";
+import { ScheduleModule } from "@nestjs/schedule";
 import { AppController } from "./app.controller";
 import { AuthModule } from "./modules/auth/auth.module";
 import { AppointmentsModule } from "./modules/appointments/appointments.module";
@@ -18,6 +19,7 @@ import { RolesGuard } from "./security/roles.guard";
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
+    ScheduleModule.forRoot(),
     ThrottlerModule.forRoot([{ ttl: 60_000, limit: 60 }]),
     StorageModule,
     AuthModule,

@@ -6,7 +6,12 @@
   ForbiddenException,
   UnauthorizedException,
 } from "@nestjs/common";
-import { AppointmentSource, Prisma, UserRole } from "@prisma/client";
+import {
+  AppointmentSource,
+  AppointmentStatus,
+  Prisma,
+  UserRole,
+} from "@prisma/client";
 import {
   addMinutes,
   overlaps,
@@ -22,9 +27,11 @@ import {
   toDbDate,
 } from "../../storage/prisma-mappers";
 import { PrismaService } from "../../storage/prisma.service";
+import { NotificationsService } from "../notifications/notifications.service";
 import { CreateAppointmentDto } from "./dto/create-appointment.dto";
 import { CreateRecurringBookingDto } from "./dto/create-recurring-booking.dto";
 import { RescheduleAppointmentDto } from "./dto/reschedule-appointment.dto";
+import { UpdateAppointmentStatusDto } from "./dto/update-appointment-status.dto";
 
 type Db = PrismaService | Prisma.TransactionClient;
 type ActiveService = {
@@ -34,7 +41,10 @@ type ActiveService = {
 
 @Injectable()
 export class AppointmentsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly notifications: NotificationsService,
+  ) {}
 
   async findAll(date?: string) {
     if (!date) {
@@ -90,13 +100,15 @@ export class AppointmentsService {
   async create(dto: CreateAppointmentDto, user: AuthenticatedUser) {
     const appointmentDto = this.applyAppointmentOwner(dto, user);
 
-    return this.prisma.$transaction(
+    const created = await this.prisma.$transaction(
       async (tx) => {
         await this.lockScheduleDate(tx, appointmentDto.date);
 
         const service = await this.getService(tx, appointmentDto.serviceId);
         const client = appointmentDto.clientId
-          ? await tx.client.findUnique({ where: { id: appointmentDto.clientId } })
+          ? await tx.client.findUnique({
+              where: { id: appointmentDto.clientId },
+            })
           : undefined;
         const clientName = appointmentDto.clientName ?? client?.name;
 
@@ -136,6 +148,12 @@ export class AppointmentsService {
       },
       { isolationLevel: Prisma.TransactionIsolationLevel.Serializable },
     );
+    await this.notifications.notifyAppointmentEvent(
+      created.id,
+      "created",
+      user.role,
+    );
+    return created;
   }
 
   async reschedule(
@@ -143,12 +161,17 @@ export class AppointmentsService {
     dto: RescheduleAppointmentDto,
     user: AuthenticatedUser,
   ) {
-    return this.prisma.$transaction(
+    const updated = await this.prisma.$transaction(
       async (tx) => {
         await this.lockScheduleDate(tx, dto.date);
 
         const appointment = await this.getAppointment(tx, id);
         this.ensureCanManageAppointment(appointment, user);
+        if (appointment.status !== AppointmentStatus.SCHEDULED) {
+          throw new BadRequestException(
+            "Somente agendamentos pendentes podem ser remarcados.",
+          );
+        }
         const currentDate = mapAppointment(appointment).date;
         if (currentDate !== dto.date) {
           await this.lockScheduleDate(tx, currentDate);
@@ -172,13 +195,92 @@ export class AppointmentsService {
       },
       { isolationLevel: Prisma.TransactionIsolationLevel.Serializable },
     );
+    await this.notifications.notifyAppointmentEvent(
+      updated.id,
+      "rescheduled",
+      user.role,
+    );
+    return updated;
   }
 
   async remove(id: string, user: AuthenticatedUser) {
     const appointment = await this.getAppointment(this.prisma, id);
     this.ensureCanManageAppointment(appointment, user);
-    await this.prisma.appointment.delete({ where: { id } });
-    return { deleted: true };
+    if (appointment.status === AppointmentStatus.CANCELED) {
+      return mapAppointment(appointment);
+    }
+    if (appointment.status !== AppointmentStatus.SCHEDULED) {
+      throw new BadRequestException(
+        "Somente agendamentos pendentes podem ser cancelados.",
+      );
+    }
+
+    const canceled = await this.prisma.appointment.update({
+      where: { id },
+      data: {
+        status: AppointmentStatus.CANCELED,
+        canceledAt: new Date(),
+        completedAt: null,
+        cancellationReason:
+          user.role === UserRole.ADMIN
+            ? "Cancelado pela administração."
+            : "Cancelado pelo usuário.",
+      },
+    });
+    const mapped = mapAppointment(canceled);
+    await this.notifications.notifyAppointmentEvent(
+      mapped.id,
+      "canceled",
+      user.role,
+    );
+    return mapped;
+  }
+
+  async updateStatus(id: string, dto: UpdateAppointmentStatusDto) {
+    const result = await this.prisma.$transaction(
+      async (tx) => {
+        const appointment = await this.getAppointment(tx, id);
+        if (appointment.status === dto.status) {
+          return { appointment: mapAppointment(appointment), changed: false };
+        }
+
+        if (dto.status === AppointmentStatus.SCHEDULED) {
+          const date = mapAppointment(appointment).date;
+          await this.lockScheduleDate(tx, date);
+          const service = await this.getService(tx, appointment.serviceId);
+          if (
+            !(await this.canUseSlot(tx, date, appointment.start, service, id))
+          ) {
+            throw new ConflictException(
+              "Não foi possível reabrir: o horário já está ocupado.",
+            );
+          }
+        }
+
+        const updated = await tx.appointment.update({
+          where: { id },
+          data: {
+            status: dto.status,
+            canceledAt:
+              dto.status === AppointmentStatus.CANCELED ? new Date() : null,
+            completedAt:
+              dto.status === AppointmentStatus.COMPLETED ? new Date() : null,
+            cancellationReason:
+              dto.status === AppointmentStatus.CANCELED
+                ? dto.cancellationReason?.trim() ||
+                  "Cancelado pela administração."
+                : null,
+          },
+        });
+
+        return { appointment: mapAppointment(updated), changed: true };
+      },
+      { isolationLevel: Prisma.TransactionIsolationLevel.Serializable },
+    );
+    if (result.changed) {
+      await this.notifications.notifyAppointmentStatus(id, dto.status);
+    }
+    return result.appointment;
   }
 
   async findRecurring() {
@@ -309,7 +411,10 @@ export class AppointmentsService {
     return user.clientId;
   }
 
-  private applyAppointmentOwner(dto: CreateAppointmentDto, user: AuthenticatedUser) {
+  private applyAppointmentOwner(
+    dto: CreateAppointmentDto,
+    user: AuthenticatedUser,
+  ) {
     if (user.role === UserRole.ADMIN) {
       return dto;
     }
@@ -332,7 +437,9 @@ export class AppointmentsService {
     }
 
     if (!user.clientId || appointment.clientId !== user.clientId) {
-      throw new ForbiddenException("Voce nao tem permissao para alterar este agendamento.");
+      throw new ForbiddenException(
+        "Voce nao tem permissao para alterar este agendamento.",
+      );
     }
   }
   private async canUseSlot(
@@ -444,6 +551,10 @@ export class AppointmentsService {
       clientName: item.client.name,
       serviceId: item.serviceId,
       source: AppointmentSource.recurring,
+      status: AppointmentStatus.SCHEDULED,
+      canceledAt: null,
+      completedAt: null,
+      cancellationReason: null,
     }));
 
     return [...regular.map(mapAppointment), ...generated].sort(
@@ -466,6 +577,7 @@ export class AppointmentsService {
       ...bookings
         .filter(
           (appointment) =>
+            appointment.status === AppointmentStatus.SCHEDULED &&
             appointment.id !== ignoreAppointmentId &&
             appointment.id !== `${ignoreRecurringId}-${date}`,
         )
@@ -547,6 +659,3 @@ export class AppointmentsService {
     await db.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${`recurring:${weekday}`}))`;
   }
 }
-
-
-

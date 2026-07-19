@@ -23,6 +23,93 @@ model User {
   privacyVersion  String?
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt
+  sessions      AuthSession[]
+  pushTokens    PushToken[]
+  notificationPreference NotificationPreference?
+  notificationJobs NotificationJob[]
+}
+
+model NotificationPreference {
+  userId             String   @id
+  reminders          Boolean  @default(true)
+  appointmentChanges Boolean  @default(true)
+  promotions         Boolean  @default(false)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+  user               User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model NotificationJob {
+  id             String                @id @default(cuid())
+  userId         String
+  category       NotificationCategory
+  title          String
+  body           String
+  data           Json?
+  status         NotificationJobStatus @default(PENDING)
+  attempts       Int                   @default(0)
+  maxAttempts    Int                   @default(5)
+  availableAt    DateTime              @default(now())
+  lockedAt       DateTime?
+  sentAt         DateTime?
+  lastError      String?
+  idempotencyKey String?               @unique
+  createdAt      DateTime              @default(now())
+  updatedAt      DateTime              @updatedAt
+  user           User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  receipts       NotificationReceipt[]
+
+  @@index([status, availableAt])
+  @@index([userId, category])
+}
+
+model NotificationReceipt {
+  id          String                    @id @default(cuid())
+  jobId       String
+  token       String
+  receiptId   String                    @unique
+  status      NotificationReceiptStatus @default(PENDING)
+  attempts    Int                       @default(0)
+  availableAt DateTime                  @default(now())
+  checkedAt   DateTime?
+  error       String?
+  createdAt   DateTime                  @default(now())
+  updatedAt   DateTime                  @updatedAt
+  job         NotificationJob           @relation(fields: [jobId], references: [id], onDelete: Cascade)
+
+  @@index([status, availableAt])
+  @@index([jobId])
+}
+
+model AuthSession {
+  id               String      @id @default(cuid())
+  userId           String
+  refreshTokenHash String
+  expiresAt        DateTime
+  revokedAt        DateTime?
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
+  user             User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  pushTokens       PushToken[]
+
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+model PushToken {
+  id        String       @id @default(cuid())
+  token     String       @unique
+  platform  String
+  deviceId  String?
+  userId    String
+  sessionId String
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+  user      User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  session   AuthSession  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([sessionId])
 }
 
 model Client {
@@ -57,12 +144,17 @@ model Appointment {
   clientName          String
   serviceId           String
   source              AppointmentSource
+  status              AppointmentStatus      @default(SCHEDULED)
+  canceledAt          DateTime?
+  completedAt         DateTime?
+  cancellationReason  String?
   client              Client?              @relation(fields: [clientId], references: [id], onDelete: SetNull)
   service             Service              @relation(fields: [serviceId], references: [id])
   createdAt           DateTime             @default(now())
   updatedAt           DateTime             @updatedAt
 
   @@index([date, start])
+  @@index([date, status, start])
 }
 
 model RecurringBooking {
@@ -125,8 +217,34 @@ enum AppointmentSource {
   recurring
 }
 
+enum AppointmentStatus {
+  SCHEDULED
+  COMPLETED
+  CANCELED
+  NO_SHOW
+}
+
 enum UserRole {
   ADMIN
   CLIENT
+}
+
+enum NotificationCategory {
+  REMINDER
+  APPOINTMENT_CHANGES
+  PROMOTIONS
+}
+
+enum NotificationJobStatus {
+  PENDING
+  PROCESSING
+  SENT
+  FAILED
+}
+
+enum NotificationReceiptStatus {
+  PENDING
+  DELIVERED
+  FAILED
 }
 

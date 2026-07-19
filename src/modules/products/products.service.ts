@@ -1,8 +1,9 @@
-﻿import { Injectable, NotFoundException } from "@nestjs/common";
+import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
 import { mapProduct } from "../../storage/prisma-mappers";
 import { PrismaService } from "../../storage/prisma.service";
 import { UploadsService } from "../uploads/uploads.service";
 import { CreateProductDto } from "./dto/create-product.dto";
+import { UpdateProductDto } from "./dto/update-product.dto";
 
 @Injectable()
 export class ProductsService {
@@ -23,13 +24,16 @@ export class ProductsService {
         price: dto.price,
         image: dto.image,
         description: dto.description,
-        available: dto.available ?? true
-      }
+        available: dto.available ?? true,
+      },
     });
     return mapProduct(product);
   }
 
-  async update(id: string, dto: Partial<CreateProductDto>) {
+  async update(id: string, dto: UpdateProductDto) {
+    if (Object.keys(dto).length === 0) {
+      throw new BadRequestException("Informe ao menos um campo para atualizar.");
+    }
     const product = await this.prisma.product.findUnique({ where: { id } });
     if (!product) {
       throw new NotFoundException("Produto nao encontrado.");
@@ -55,4 +59,3 @@ export class ProductsService {
     return { deleted: true };
   }
 }
-
